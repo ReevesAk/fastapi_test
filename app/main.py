@@ -31,7 +31,7 @@ async def create_single_task(user: TaskIn_Pydantic):
 
 
 @app.post("/tasks", response_model=Task_Pydantic)
-async def create_multiple_task(user: TaskIn_Pydantic):
+async def create_multiple_tasks(user: TaskIn_Pydantic):
     task_obj = []
     new_obj = await Tasks.create(**user.dict(exclude_unset=True))
     return await Task_Pydantic.from_tortoise_orm(task_obj.append(new_obj))

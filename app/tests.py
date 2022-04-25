@@ -4,7 +4,7 @@ from typing import Generator
 import pytest
 from fastapi.testclient import TestClient
 from main import app
-from models import Tasks
+from models import Tasks, Tasks
 
 from tortoise.contrib.test import finalizer, initializer
 
@@ -23,31 +23,62 @@ def event_loop(client: TestClient) -> Generator:
 
 
 def test_create_task(client: TestClient, event_loop: asyncio.AbstractEventLoop):  # nosec
-    response = client.post("/tasks", json={"username": "admin"})
+    response = client.post("/tasks", json={"title": "Produce Juice"})
     assert response.status_code == 200, response.text
     data = response.json()
-    assert data["username"] == "admin"
+    assert data["title"] == "Produce Juice"
     assert "id" in data
-    user_id = data["id"]
+    task_id = data["id"]
 
-    async def get_user_by_db():
-        user = await Tasks.get(id=user_id)
-        return user
+    async def get_task_by_db():
+        task = await Tasks.get(id=task_id)
+        return task
 
-    user_obj = event_loop.run_until_complete(get_user_by_db())
-    assert user_obj.id == user_id
+    task_obj = event_loop.run_until_complete(get_task_by_db())
+    assert task_obj.id == task_id
 
-def test_get_task(client: TestClient, event_loop: asyncio.AbstractEventLoop):  # nosec
-    response = client.get("/tasks", json={"username": "admin"})
+def test_get_task(client: TestClient, event_loop: asyncio.AbstractEventLoop):
+    response = client.get("/tasks", json={"title": "Produce"})
     assert response.status_code == 200, response.text
     data = response.json()
-    assert data["username"] == "admin"
+    assert data["title"] == "Produce"
     assert "id" in data
-    user_id = data["id"]
+    task_id = data["id"]
 
-    async def get_user_by_db():
-        user = await Tasks.get(id=user_id)
-        return user
+    async def get_task_by_db():
+        task = await Tasks.get(id=task_id)
+        return task
 
-    user_obj = event_loop.run_until_complete(get_user_by_db())
-    assert user_obj.id == user_id    
+    task_obj = event_loop.run_until_complete(get_task_by_db())
+    assert task_obj.id == task_id    
+
+
+def test_update_task(client: TestClient, event_loop: asyncio.AbstractEventLoop):
+    response = client.put("/tasks", json={"title": "Produce juice",
+                                           "description": "Get the fruit and juice it"
+                                           "is_completed: True"})
+
+
+    assert response.status_code == 200, response.text
+    data = response.json()
+    assert data["title"] == "Produce juice"
+    assert "id" in data
+    task_id = data["id"]
+
+    async def get_task_by_db():
+            task = await Tasks.get(id=task_id)
+            return task
+
+    task_obj = event_loop.run_until_complete(get_task_by_db())
+    assert task_obj.id == task_id
+
+
+def test_delete_task(client: TestClient, event_loop: asyncio.AbstractEventLoop):
+    response = client.delete("/tasks", json={"title": "Produce juice",
+                                           "description": "Get the fruit and juice it"
+                                           "is_completed: True"})
+
+
+    assert response.status_code == 404, response.text
+    data = response.json()
+    assert data["title"] == "Not Found"

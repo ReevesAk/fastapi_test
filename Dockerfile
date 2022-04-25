@@ -11,7 +11,7 @@ COPY ./requirements.txt /code/requirements.txt
 RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt 
 
 # Install other package dependencies.
-RUN pip install tortoise-orm && pip install tortoise-orm[asyncpg]
+RUN pip install tortoise-orm && pip install tortoise-orm[asyncpg] && pip install pytest
 
 # Copy the ./app directory inside the /code directory.
 COPY ./app /code/app
